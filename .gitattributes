@@ -1,3 +1,16 @@
+# Force LF line endings for all text files
+* text=auto eol=lf
+
+# Ensure shell scripts always use LF
+*.sh text eol=lf
+commands/** text eol=lf
+
+# Config files
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+.gitattributes text eol=lf
+
 # Exclude files from releases/tarballs
 tests/ export-ignore
 .github/ export-ignore
