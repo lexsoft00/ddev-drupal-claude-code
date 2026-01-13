@@ -1,0 +1,23 @@
+#ddev-generated
+# Dockerfile for Claude Code addon - extends DDEV web container
+# All stable tools are baked into the image for faster container starts
+
+# Install Claude Code CLI globally
+RUN npm install -g @anthropic-ai/claude-code
+
+# Install GitLab CLI (glab) for GitLab integration
+RUN curl -sSL "https://raw.githubusercontent.com/upciti/wakemeops/main/assets/install_repository" | bash && apt install -y glab
+
+# Install language servers for Serena
+# - intelephense: PHP language server
+# - typescript: TypeScript language server (tsserver)
+RUN npm install -g intelephense typescript
+
+# Install uv (Python package manager for Serena)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install system utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    jq \
+    ripgrep \
+    && rm -rf /var/lib/apt/lists/*

@@ -1,13 +1,22 @@
 [![add-on registry](https://img.shields.io/badge/DDEV-Add--on_Registry-blue)](https://addons.ddev.com)
 [![tests](https://github.com/lexsoft00/ddev-drupal-claude-code/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/lexsoft00/ddev-drupal-claude-code/actions/workflows/tests.yml?query=branch%3Amain)
-[![last commit](https://img.shields.io/github/last-commit/lexsoft00/ddev-drupal-claude-code)](https://github.com/lexsoft00/ddev-drupal-claude-code/commits)
 [![release](https://img.shields.io/github/v/release/lexsoft00/ddev-drupal-claude-code)](https://github.com/lexsoft00/ddev-drupal-claude-code/releases/latest)
 
 # DDEV Drupal Claude Code
 
-## Overview
+A [DDEV](https://ddev.com/) add-on that integrates [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with [Serena MCP](https://github.com/oraios/serena) for Drupal 11 development.
 
-This add-on integrates Drupal Claude Code into your [DDEV](https://ddev.com/) project.
+## Features
+
+- **Claude Code** running inside your DDEV web container
+- **Serena MCP** for semantic code analysis and intelligent editing
+- **Drupal 11 optimized** with pre-configured CLAUDE.md and Serena memories
+- **Security rules** preventing dangerous operations on core/vendor files
+- **Official plugins** including Context7, security-guidance, and code-simplifier
+
+## Requirements
+
+- DDEV v1.24.3+
 
 ## Installation
 
@@ -16,33 +25,53 @@ ddev add-on get lexsoft00/ddev-drupal-claude-code
 ddev restart
 ```
 
-After installation, make sure to commit the `.ddev` directory to version control.
-
 ## Usage
 
-| Command | Description |
-| ------- | ----------- |
-| `ddev describe` | View service status and used ports for Drupal Claude Code |
-| `ddev logs -s drupal-claude-code` | Check Drupal Claude Code logs |
-
-## Advanced Customization
-
-To change the Docker image:
-
 ```bash
-ddev dotenv set .ddev/.env.drupal-claude-code --drupal-claude-code-docker-image="ddev/ddev-utilities:latest"
-ddev add-on get lexsoft00/ddev-drupal-claude-code
-ddev restart
+# Enter the DDEV container
+ddev ssh
+
+# Start Claude Code (first run - configure initial settings)
+claude
+
+# Exit Claude Code (Ctrl+C or /exit), then add Serena MCP and index your project
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project "$(pwd)"
+uvx --from git+https://github.com/oraios/serena serena project index
+
+# Start Claude Code again
+claude
 ```
 
-Make sure to commit the `.ddev/.env.drupal-claude-code` file to version control.
+Inside Claude Code, you have access to:
+- **Serena tools** for code search, symbol navigation, and refactoring
+- **Drupal memories** with coding standards, Drush commands, and best practices
+- **Context7** for up-to-date library documentation
 
-All customization options (use with caution):
+## What Gets Installed
 
-| Variable | Flag | Default |
-| -------- | ---- | ------- |
-| `DRUPAL_CLAUDE_CODE_DOCKER_IMAGE` | `--drupal-claude-code-docker-image` | `ddev/ddev-utilities:latest` |
+### DDEV Configuration
 
-## Credits
+- **`config.drupal-claude-code.yaml`** - Post-start hooks that configure Claude Code
+- **`.ddev/.claude/`** - Symlinked to `~/.claude` for persisting Claude Code runtime data
 
-**Contributed and maintained by [@lexsoft00](https://github.com/lexsoft00)**
+### Claude Code Settings (`.ddev/drupal-claude-code/`)
+
+- **`settings.json`** - Plugins (Context7, security-guidance, code-simplifier) and statusline
+- **`settings.local.json`** - Permission rules protecting core/vendor from edits
+- **`statusline.sh`** - Status bar showing git branch and Drupal info
+
+### Serena Configuration (`.ddev/drupal-claude-code/serena/`)
+
+- **`project.yml`** - Project settings for PHP/TypeScript analysis
+- **`memories/`** - Drupal knowledge bases:
+  - `project-overview.md` - Project structure and patterns
+  - `code-style-conventions.md` - Drupal coding standards
+  - `commands-reference.md` - Drush and CLI commands
+  - `architecture-patterns.md` - Drupal best practices
+  - `security-guidelines.md` - Security checklist
+  - `task-completion-checklist.md` - Quality gates
+
+### Project Root Files
+
+- **`CLAUDE.md`** - Project-specific instructions for Claude Code
+- **`.claudeignore`** - Excludes vendor, node_modules, and generated files from context

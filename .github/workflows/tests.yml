@@ -4,7 +4,7 @@ on:
     paths-ignore:
       - "**.md"
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "**.md"
 
@@ -27,7 +27,49 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    name: Lint Configuration Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq yamllint
+
+      - name: Lint YAML files
+        run: |
+          yamllint -d relaxed install.yaml
+          yamllint -d relaxed config.drupal-claude-code.yaml
+
+      - name: Validate JSON files
+        run: |
+          jq '.' drupal-claude-code/settings.json > /dev/null
+          jq '.' drupal-claude-code/settings.local.json > /dev/null
+
+      - name: Check shell script syntax
+        run: |
+          bash -n commands/web/claude
+          bash -n commands/web/glab
+          bash -n drupal-claude-code/statusline.sh
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for secrets
+        run: |
+          if grep -rE "(sk-ant-|sk-[a-zA-Z0-9]{48})" --include="*.json" --include="*.yaml" --include="*.yml" .; then
+            echo "ERROR: Potential secrets found in repository!"
+            exit 1
+          fi
+          echo "No secrets detected."
+
   tests:
+    needs: [lint, security]
     strategy:
       matrix:
         ddev_version: [stable, HEAD]
@@ -41,5 +83,5 @@ jobs:
           ddev_version: ${{ matrix.ddev_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           debug_enabled: ${{ github.event.inputs.debug_enabled }}
-          addon_repository: ${{ env.GITHUB_REPOSITORY }}
-          addon_ref: ${{ env.GITHUB_REF }}
+          addon_repository: ${{ github.repository }}
+          addon_ref: ${{ github.ref }}
