@@ -62,7 +62,7 @@ jobs:
 
       - name: Check for secrets
         run: |
-          if grep -rE "(sk-ant-|sk-[a-zA-Z0-9]{48})" --include="*.json" --include="*.yaml" --include="*.yml" .; then
+          if grep -rE "(sk-ant-|sk-[a-zA-Z0-9]{48})" --include="*.json" --include="*.yaml" --include="*.yml" --exclude="tests.yml" .; then
             echo "ERROR: Potential secrets found in repository!"
             exit 1
           fi
