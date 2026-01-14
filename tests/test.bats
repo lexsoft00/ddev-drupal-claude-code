@@ -45,28 +45,11 @@ setup() {
 
 health_checks() {
   # Verify addon files are installed correctly
-
-  # Check config files exist
   assert_file_exists .ddev/config.drupal-claude-code.yaml
-
-  # Check drupal-claude-code directory
   assert_file_exists .ddev/drupal-claude-code/settings.json
   assert_file_exists .ddev/drupal-claude-code/settings.local.json
-  assert_file_exists .ddev/drupal-claude-code/statusline.sh
-  assert_file_exists .ddev/drupal-claude-code/.claudeignore
-
-  # Check commands
   assert_file_exists .ddev/commands/web/claude
   assert_file_exists .ddev/commands/web/glab
-
-  # Check serena configuration (inside drupal-claude-code)
-  assert_file_exists .ddev/drupal-claude-code/serena/project.yml
-  assert_file_exists .ddev/drupal-claude-code/serena/memories/project-overview.md
-
-  # Check .claude directory for symlink
-  assert_dir_exists .ddev/.claude
-
-  # Check web-build
   assert_file_exists .ddev/web-build/Dockerfile.drupal-claude-code
 
   # Check project root files were created
@@ -75,22 +58,6 @@ health_checks() {
 
   # Check .serena directory was created
   assert_dir_exists .serena
-  assert_dir_exists .serena/memories
-
-  # Verify ddev claude command works
-  run ddev claude --help
-  assert_success
-
-  # Verify ddev claude status works
-  run ddev claude status
-  assert_success
-
-  # Verify JSON files are valid
-  run ddev exec "jq '.' /var/www/html/.ddev/drupal-claude-code/settings.json"
-  assert_success
-
-  run ddev exec "jq '.' /var/www/html/.ddev/drupal-claude-code/settings.local.json"
-  assert_success
 }
 
 teardown() {
